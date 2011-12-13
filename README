@@ -34,7 +34,7 @@ $.mxstache({
 
 Here's how to properly format a response in Rails:
 
-1. First, install the plugin that lets you render :mxhr (url here)
+1. First, install the plugin that lets you render :mxhr (https://github.com/dfltr/MXHR_Rails)
 2. Do this in your controller:
 
 data = { :world => "New Caprica" }
