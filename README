@@ -1,0 +1,64 @@
+CAVEAT EMPTOR: This is an alpha, it will likely totally change. I'm putting it up here because I think it's interesting.
+
+
+Mxstache is MXHR (https://github.com/dfltr/jQuery-MXHR) plus Mustache.js. I was tired of trying to find a sane way to organize Mustache templates on the front-end (preload them in the page? bundle them in a JSON structure?) so I wrote this.
+
+You'll need to load jquery.js, jquery.mxhr.js and Mustache.js in before using this, but if you're the type of person that pokes around in framework alphas on Github, you probably already sussed that out.
+
+Anyways, Mxstache uses multipart XHRs to say:
+
+1. Do I have a template for this endpoint?
+2. If so, just request the JSON view to fill it out with new data.
+3. If not, send me the template along with the view and I'll cache it for next time.
+
+Bam. Dead simple. One request. That's all it does. Use it like this:
+
+$.mxstache({
+    //Automatically appends '.json' or '.mxhr' to the url based on context
+    url: '/some/endpoint',
+    
+    //OPTIONAL: Cache your template under this name to share it between different urls
+    as: 'someTemplate',
+    
+    //Same as jQuery.ajax
+    type: 'POST',
+    data: {
+        foo: 'bar'
+    },
+    
+    //Do whatever you please with the finished HTML
+    success: function(html) {
+        console.log(html);
+    }
+});
+
+Here's how to properly format a response in Rails:
+
+1. First, install the plugin that lets you render :mxhr (url here)
+2. Do this in your controller:
+
+data = { :world => "New Caprica" }
+
+respond_to do |format|
+  format.json do
+    render :json => data
+  end
+  format.mxhr do
+    render :mxhr => [{
+      :type => 'text/x-mustache-template',
+      :body => {
+        :template => "Hello {{> new_planet}}",
+        :partials => {
+          :new_planet => "{{world}}"
+        }
+      }.to_json
+    }, {
+      :type => 'application/json',
+      :body => data
+    }]
+  end
+end
+
+You may have noticed that the x-mustache-template structure sucks ass right now. I'm working on a better way to get partials down the pipe in a proper multipart fashion, but for now this works.
+
+Godspeed!
